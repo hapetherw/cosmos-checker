@@ -8,5 +8,7 @@ import (
 
 // x/checkers module sentinel errors
 var (
-	ErrSample = sdkerrors.Register(ModuleName, 1100, "sample error")
+    ErrInvalidRed       = sdkerrors.Register(ModuleName, 1100, "red address is invalid: %s")
+    ErrInvalidBlack     = sdkerrors.Register(ModuleName, 1101, "black address is invalid: %s")
+    ErrGameNotParseable = sdkerrors.Register(ModuleName, 1102, "game cannot be parsed")
 )

@@ -4,6 +4,42 @@ info:
   name: ''
   description: ''
 paths:
+  /alice/checkers/checkers/next_game:
+    get:
+      summary: Queries a NextGame by index.
+      operationId: AliceCheckersCheckersNextGame
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              NextGame:
+                type: object
+                properties:
+                  idValue:
+                    type: string
+                    format: uint64
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    '@type':
+                      type: string
+                  additionalProperties: {}
+      tags:
+        - Query
   /alice/checkers/checkers/params:
     get:
       summary: Parameters queries the parameters of the module.
@@ -30411,9 +30447,24 @@ paths:
 definitions:
   alice.checkers.checkers.MsgCreatePostResponse:
     type: object
+  alice.checkers.checkers.NextGame:
+    type: object
+    properties:
+      idValue:
+        type: string
+        format: uint64
   alice.checkers.checkers.Params:
     type: object
     description: Params defines the parameters for the module.
+  alice.checkers.checkers.QueryGetNextGameResponse:
+    type: object
+    properties:
+      NextGame:
+        type: object
+        properties:
+          idValue:
+            type: string
+            format: uint64
   alice.checkers.checkers.QueryParamsResponse:
     type: object
     properties:
