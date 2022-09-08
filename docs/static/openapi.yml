@@ -193,16 +193,6 @@ paths:
           in: query
           required: false
           type: boolean
-        - name: pagination.reverse
-          description: >-
-            reverse is set to true if results are to be returned in the
-            descending order.
-
-
-            Since: cosmos-sdk 0.43
-          in: query
-          required: false
-          type: boolean
       tags:
         - Query
   '/alice/checkers/checkers/stored_game/{index}':
@@ -30629,6 +30619,19 @@ definitions:
         type: string
   alice.checkers.checkers.MsgCreatePostResponse:
     type: object
+  alice.checkers.checkers.MsgPlayMoveResponse:
+    type: object
+    properties:
+      idValue:
+        type: string
+      capturedX:
+        type: string
+        format: int64
+      capturedY:
+        type: string
+        format: int64
+      winner:
+        type: string
   alice.checkers.checkers.NextGame:
     type: object
     properties:
