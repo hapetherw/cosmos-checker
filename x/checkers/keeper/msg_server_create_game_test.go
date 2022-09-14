@@ -18,6 +18,12 @@ const (
 	carol = "cosmos1e0w5t53nrq7p66fye6c8p0ynyhf6y24l4yuxd7"
 )
 
+func setupMsgServerCreateGame(t testing.TB) (types.MsgServer, keeper.Keeper, context.Context) {
+	k, ctx := keepertest.CheckersKeeper(t)
+	checkers.InitGenesis(ctx, *k, *types.DefaultGenesis())
+	return keeper.NewMsgServerImpl(*k), *k, sdk.WrapSDKContext(ctx)
+}
+
 func TestCreateGame(t *testing.T) {
 	msgServer, _, context := setupMsgServerCreateGame(t)
 	createResponse, err := msgServer.CreateGame(context, &types.MsgCreateGame{
@@ -29,12 +35,6 @@ func TestCreateGame(t *testing.T) {
 	require.EqualValues(t, types.MsgCreateGameResponse{
 		IdValue: "1", // TODO: update with a proper value when updated
 	}, *createResponse)
-}
-
-func setupMsgServerCreateGame(t testing.TB) (types.MsgServer, keeper.Keeper, context.Context) {
-	k, ctx := keepertest.CheckersKeeper(t)
-	checkers.InitGenesis(ctx, *k, *types.DefaultGenesis())
-	return keeper.NewMsgServerImpl(*k), *k, sdk.WrapSDKContext(ctx)
 }
 
 func TestCreate1GameHasSaved(t *testing.T) {
@@ -73,41 +73,12 @@ func TestCreate1GameEmitted(t *testing.T) {
 	require.Len(t, events, 1)
 	event := events[0]
 	require.EqualValues(t, sdk.StringEvent{
-		Type: "message",
+		Type: "new-game-created",
 		Attributes: []sdk.Attribute{
-			{Key: "module", Value: "checkers"},
-			{Key: "action", Value: "NewGameCreated"},
-			{Key: "Creator", Value: alice},
-			{Key: "Index", Value: "1"},
-			{Key: "Red", Value: bob},
-			{Key: "Black", Value: carol},
+			{Key: "creator", Value: alice},
+			{Key: "game-index", Value: "1"},
+			{Key: "black", Value: carol},
+			{Key: "red", Value: bob},
 		},
 	}, event)
-}
-
-func TestPlayMoveEmitted(t *testing.T) {
-	msgServer, _, context := setupMsgServerWithOneGameForPlayMove(t)
-	msgServer.PlayMove(context, &types.MsgPlayMove{
-		Creator: carol,
-		IdValue: "1",
-		FromX:   1,
-		FromY:   2,
-		ToX:     2,
-		ToY:     3,
-	})
-	ctx := sdk.UnwrapSDKContext(context)
-	require.NotNil(t, ctx)
-	events := sdk.StringifyEvents(ctx.EventManager().ABCIEvents())
-	require.Len(t, events, 1)
-	event := events[0]
-	require.Equal(t, event.Type, "message")
-	require.EqualValues(t, []sdk.Attribute{
-		{Key: "module", Value: "checkers"},
-		{Key: "action", Value: "MovePlayed"},
-		{Key: "Creator", Value: carol},
-		{Key: "IdValue", Value: "1"},
-		{Key: "CapturedX", Value: "-1"},
-		{Key: "CapturedY", Value: "-1"},
-		{Key: "Winner", Value: "*"},
-	}, event.Attributes[6:])
 }

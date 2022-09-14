@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	"github.com/alice/checkers/x/checkers/rules"
@@ -57,9 +58,20 @@ func (k msgServer) PlayMove(goCtx context.Context, msg *types.MsgPlayMove) (*typ
 		return nil, sdkerrors.Wrapf(types.ErrWrongMove, moveErr.Error())
 	}
 
+	storedGame.MoveCount++
 	storedGame.Game = game.String()
 	storedGame.Turn = rules.PieceStrings[game.Turn]
 	k.Keeper.SetStoredGame(ctx, storedGame)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(types.MovePlayedEventType,
+			sdk.NewAttribute(types.MovePlayedEventCreator, msg.Creator),
+			sdk.NewAttribute(types.MovePlayedEventGameIndex, msg.IdValue),
+			sdk.NewAttribute(types.MovePlayedEventCapturedX, strconv.FormatInt(int64(captured.X), 10)),
+			sdk.NewAttribute(types.MovePlayedEventCapturedY, strconv.FormatInt(int64(captured.Y), 10)),
+			sdk.NewAttribute(types.MovePlayedEventWinner, rules.PieceStrings[game.Winner()]),
+		),
+	)
 
 	return &types.MsgPlayMoveResponse{
 		IdValue:   msg.IdValue,
