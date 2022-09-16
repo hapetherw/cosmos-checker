@@ -58,9 +58,18 @@ func (k msgServer) PlayMove(goCtx context.Context, msg *types.MsgPlayMove) (*typ
 		return nil, sdkerrors.Wrapf(types.ErrWrongMove, moveErr.Error())
 	}
 
+	nextGame, found := k.Keeper.GetNextGame(ctx)
+	if !found {
+		panic("NextGame not found")
+	}
+
+	k.Keeper.SendToFifoTail(ctx, &storedGame, &nextGame)
+
 	storedGame.MoveCount++
 	storedGame.Game = game.String()
 	storedGame.Turn = rules.PieceStrings[game.Turn]
+
+	k.Keeper.SetNextGame(ctx, nextGame)
 	k.Keeper.SetStoredGame(ctx, storedGame)
 
 	ctx.EventManager().EmitEvent(

@@ -30,7 +30,15 @@ func (k msgServer) RejectGame(goCtx context.Context, msg *types.MsgRejectGame) (
 		return nil, sdkerrors.Wrapf(types.ErrCreatorNotPlayer, "%s", msg.Creator)
 	}
 
+	nextGame, found := k.Keeper.GetNextGame(ctx)
+	if !found {
+		panic("NextGame not found")
+	}
+
+	k.Keeper.RemoveFromFifo(ctx, &storedGame, &nextGame)
 	k.Keeper.RemoveStoredGame(ctx, msg.GameIndex)
+
+	k.Keeper.SetNextGame(ctx, nextGame)
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(types.GameRejectedEventType,
