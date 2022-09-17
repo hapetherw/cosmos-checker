@@ -66,8 +66,10 @@ func (k msgServer) PlayMove(goCtx context.Context, msg *types.MsgPlayMove) (*typ
 	k.Keeper.SendToFifoTail(ctx, &storedGame, &nextGame)
 
 	storedGame.MoveCount++
+
 	storedGame.Game = game.String()
 	storedGame.Turn = rules.PieceStrings[game.Turn]
+	storedGame.Deadline = types.FormatDeadline(types.GetNextDeadline(ctx))
 
 	k.Keeper.SetNextGame(ctx, nextGame)
 	k.Keeper.SetStoredGame(ctx, storedGame)
